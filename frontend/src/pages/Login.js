@@ -29,7 +29,8 @@ const Login = () => {
       }
       
       localStorage.setItem('token', data.token);
-      navigate('/board');
+      navigate('/board')
+    window.location.reload()
     } catch (err) {
       setError(err.message);
     } finally {

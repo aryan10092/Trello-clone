@@ -45,7 +45,7 @@ const ActivityLog = () => {
 
         <div className="activitylog-stats">
 
-          <span className="log-count">{logs.length} Activities</span>
+          <span className="log-count">Last {logs.length} Activities</span>
         </div>
        </div>
       

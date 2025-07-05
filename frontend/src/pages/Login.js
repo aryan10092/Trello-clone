@@ -25,15 +25,16 @@ const Login = () => {
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || 'Login failed')
       }
       
-      localStorage.setItem('token', data.token);
-      navigate('/board');
+      localStorage.setItem('token', data.token)
+      navigate('/board')
+      window.location.reload()
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   };
 

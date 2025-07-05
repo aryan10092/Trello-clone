@@ -26,6 +26,7 @@ const Board = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragTasks, setDragTasks] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  const [disableWebSocket, setDisableWebSocket] = useState(false);
 
   // Validation helper
   const validateTaskTitle = (title, excludeTaskId = null) => {
@@ -106,14 +107,14 @@ const Board = () => {
   useEffect(() => {
     const handleRefresh = () => {
       // Don't refresh during dragging to prevent drag conflicts
-      if (!isDragging) {
+      if (!isDragging && !disableWebSocket) {
         fetchTasks();
       }
     };
 
     const handleTaskUpdate = (updatedTask) => {
       // Don't update during dragging to prevent drag conflicts
-      if (!isDragging) {
+      if (!isDragging && !disableWebSocket) {
         setTasks(prevTasks => 
           prevTasks.map(task => 
             task._id === updatedTask._id ? updatedTask : task
@@ -124,7 +125,7 @@ const Board = () => {
 
     const handleTaskDelete = (deletedTaskId) => {
       // Don't update during dragging to prevent drag conflicts
-      if (!isDragging) {
+      if (!isDragging && !disableWebSocket) {
         setTasks(prevTasks => 
           prevTasks.filter(task => task._id !== deletedTaskId)
         );
@@ -133,7 +134,7 @@ const Board = () => {
 
     const handleTaskCreate = (newTask) => {
       // Don't update during dragging to prevent drag conflicts
-      if (!isDragging) {
+      if (!isDragging && !disableWebSocket) {
         setTasks(prevTasks => [...prevTasks, newTask]);
       }
     };
@@ -635,6 +636,18 @@ const Board = () => {
             title="Click to see user task counts in console"
           >
             🔍 Debug
+          </button>
+          
+          {/* Conflict Testing Toggle */}
+          <button 
+            className={`debug-btn ${disableWebSocket ? 'active' : ''}`}
+            onClick={() => {
+              setDisableWebSocket(!disableWebSocket);
+              console.log(`WebSocket updates ${!disableWebSocket ? 'DISABLED' : 'ENABLED'} for conflict testing`);
+            }}
+            title="Toggle WebSocket updates for conflict testing"
+          >
+            {disableWebSocket ? '🔌 WS Off' : '🔌 WS On'}
           </button>
         </div>
       </div>

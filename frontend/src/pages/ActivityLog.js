@@ -37,7 +37,7 @@ const ActivityLog = () => {
         </Link>
         <h2 className="activitylog-title">📊 Activity Log</h2>
         <div className="activitylog-stats">
-          <span className="log-count">{logs.length} Activities</span>
+          <span className="log-count">Last {logs.length} Activities</span>
         </div>
       </div>
       

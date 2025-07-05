@@ -2,6 +2,8 @@
 
 A full-stack Trello clone with real-time collaboration, drag-and-drop functionality, and advanced conflict resolution. Built with React, Node.js, Express, and MongoDB.
 
+DEMO_VIDEO:https://hc-cdn.hel1.your-objectstorage.com/s/v3/fbacc52951fb09becff91eb35ac6c0d0cfb9b538_screen_recording_2025-07-06_001035.mp4
+
 ## ✨ Features
 
 ### Frontend (React)

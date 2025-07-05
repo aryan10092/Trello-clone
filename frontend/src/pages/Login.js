@@ -82,9 +82,9 @@ const Login = () => {
         </div>
         </form>
         
-        // <div className="auth-links">
-        //   <p>Don't have an account? <Link to="/register">Register here</Link></p>
-        // </div>
+         {/* <div className="auth-links">
+          <p>Don't have an account? <Link to="/register">Register here</Link></p>
+        </div> */}
       </div>
     </div>
   );

@@ -252,7 +252,7 @@ const Board = () => {
 
     try {
       // Add a 3-second delay for conflict testing
-      //await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
       const res = await fetch(getApiUrl(`/api/tasks/${editData._id}`), {
         method: 'PUT',

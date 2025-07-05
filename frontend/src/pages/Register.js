@@ -24,9 +24,10 @@ const Register = () => {
       //console.log(data)
       if (!res.ok) throw new Error(data.message || 'Registration failed');
       localStorage.setItem('token', data.token)
-      navigate('/board');
+      navigate('/board')
+      window.location.reload()
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     }
   };
 

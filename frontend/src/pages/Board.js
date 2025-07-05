@@ -107,14 +107,14 @@ const Board = () => {
   useEffect(() => {
     const handleRefresh = () => {
       // Don't refresh during dragging to prevent drag conflicts
-      if (!isDragging && !disableWebSocket) {
+      if (!isDragging ) {
         fetchTasks();
       }
     };
 
     const handleTaskUpdate = (updatedTask) => {
       // Don't update during dragging to prevent drag conflicts
-      if (!isDragging && !disableWebSocket) {
+      if (!isDragging ) {
         setTasks(prevTasks => 
           prevTasks.map(task => 
             task._id === updatedTask._id ? updatedTask : task
@@ -125,7 +125,7 @@ const Board = () => {
 
     const handleTaskDelete = (deletedTaskId) => {
       // Don't update during dragging to prevent drag conflicts
-      if (!isDragging && !disableWebSocket) {
+      if (!isDragging ) {
         setTasks(prevTasks => 
           prevTasks.filter(task => task._id !== deletedTaskId)
         );
@@ -134,7 +134,7 @@ const Board = () => {
 
     const handleTaskCreate = (newTask) => {
       // Don't update during dragging to prevent drag conflicts
-      if (!isDragging && !disableWebSocket) {
+      if (!isDragging ) {
         setTasks(prevTasks => [...prevTasks, newTask]);
       }
     };
@@ -252,7 +252,7 @@ const Board = () => {
 
     try {
       // Add a 3-second delay for conflict testing
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      //await new Promise(resolve => setTimeout(resolve, 3000));
       
       const res = await fetch(getApiUrl(`/api/tasks/${editData._id}`), {
         method: 'PUT',

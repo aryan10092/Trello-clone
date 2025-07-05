@@ -119,7 +119,7 @@ const Board = () => {
   useEffect(() => {
     const handleRefresh = () => {
 
-      // Don't refresh during dragging to prevent drag conflicts
+   
       if (!isDragging ) {
 
         fetchTasks();
@@ -128,7 +128,7 @@ const Board = () => {
 
     const handleTaskUpdate = (updatedTask) => {
 
-      // Don't update during dragging to prevent drag conflicts
+     
       if (!isDragging ) {
 
         setTasks(prevTasks => 
@@ -141,7 +141,7 @@ const Board = () => {
 
     const handleTaskDelete = (deletedTaskId) => {
 
-      // Don't update during dragging to prevent drag conflicts
+   
       if (!isDragging ) {
 
         setTasks(prevTasks => 
@@ -152,7 +152,7 @@ const Board = () => {
 
     const handleTaskCreate = (newTask) => {
 
-      // Don't update during dragging to prevent drag conflicts
+      
       if (!isDragging ) {
 
         setTasks(prevTasks => [...prevTasks, newTask]);

@@ -15,25 +15,25 @@ const io = new Server(server, {
   },
 });
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
+
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// TODO: Add routes here
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/task'));
 app.use('/api/actions', require('./routes/actionLog'));
 
-// /api/auth/users endpoint now provides a list of all users (username and email only)
 
-// Socket.IO setup
+
+
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
   socket.on('disconnect', () => {

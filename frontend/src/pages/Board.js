@@ -652,13 +652,13 @@ const Board = () => {
                 onClick={() => handleConflict('overwrite')}
                 className="btn-overwrite"
               >
-                📝 Keep My Changes
+                📝 Overwrite
               </button>
               <button 
                 onClick={() => handleConflict('merge')}
                 className="btn-merge"
               >
-                🔄 Keep Server Version
+                🔄 Merge
               </button>
               <button 
                 onClick={() => setConflict(null)}

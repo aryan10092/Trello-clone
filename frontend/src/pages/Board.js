@@ -118,15 +118,19 @@ const Board = () => {
   
   useEffect(() => {
     const handleRefresh = () => {
-      
-      if (!isDragging && !disableWebSocket) {
+
+      // Don't refresh during dragging to prevent drag conflicts
+      if (!isDragging ) {
+
         fetchTasks();
       }
     };
 
     const handleTaskUpdate = (updatedTask) => {
-    
-      if (!isDragging && !disableWebSocket) {
+
+      // Don't update during dragging to prevent drag conflicts
+      if (!isDragging ) {
+
         setTasks(prevTasks => 
           prevTasks.map(task => 
             task._id === updatedTask._id ? updatedTask : task
@@ -136,8 +140,10 @@ const Board = () => {
     };
 
     const handleTaskDelete = (deletedTaskId) => {
-    
-      if (!isDragging && !disableWebSocket) {
+
+      // Don't update during dragging to prevent drag conflicts
+      if (!isDragging ) {
+
         setTasks(prevTasks => 
           prevTasks.filter(task => task._id !== deletedTaskId)
         );
@@ -145,8 +151,10 @@ const Board = () => {
     };
 
     const handleTaskCreate = (newTask) => {
-    
-      if (!isDragging && !disableWebSocket) {
+
+      // Don't update during dragging to prevent drag conflicts
+      if (!isDragging ) {
+
         setTasks(prevTasks => [...prevTasks, newTask]);
       }
     };
@@ -651,17 +659,7 @@ const Board = () => {
             🔍 Debug
           </button>
           
-        
-          <button 
-            className={`debug-btn ${disableWebSocket ? 'active' : ''}`}
-            onClick={() => {
-              setDisableWebSocket(!disableWebSocket);
-              console.log(`WebSocket updates ${!disableWebSocket ? 'DISABLED' : 'ENABLED'} for conflict testing`);
-            }}
-            title="Toggle WebSocket updates for conflict testing"
-          >
-            {disableWebSocket ? '🔌 WS Off' : '🔌 WS On'}
-          </button>
+
         </div>
       </div>
 

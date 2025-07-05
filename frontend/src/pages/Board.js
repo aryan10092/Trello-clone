@@ -639,16 +639,7 @@ const Board = () => {
           </button>
           
           {/* Conflict Testing Toggle */}
-          // <button 
-          //   className={`debug-btn ${disableWebSocket ? 'active' : ''}`}
-          //   onClick={() => {
-          //     setDisableWebSocket(!disableWebSocket);
-          //     console.log(`WebSocket updates ${!disableWebSocket ? 'DISABLED' : 'ENABLED'} for conflict testing`);
-          //   }}
-          //   title="Toggle WebSocket updates for conflict testing"
-          // >
-          //   {disableWebSocket ? '🔌 WS Off' : '🔌 WS On'}
-          // </button>
+         
         </div>
       </div>
 

@@ -40,7 +40,9 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2 className="auth-title">Login</h2>
+
+        <h2 className="auth-title">
+          Login</h2>
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -48,10 +50,10 @@ const Login = () => {
               type="email"
               id="email"
               value={email}
+
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email"
-            />
+              placeholder="Enter your email" />
           </div>
           
           <div className="form-group">
@@ -62,8 +64,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
-            />
+              placeholder="Enter your password"  />
           </div>
           
           {error && <div className="error-message">{error}</div>}
@@ -81,6 +82,7 @@ const Login = () => {
           <p>Don't have an account? <Link to="/register">Register here</Link></p>
         </div>
       </div>
+      
     </div>
   );
 };

@@ -15,7 +15,7 @@ const Home = () => (
       )}  </div>
 
     <div className="home-graphic">
-      {/* Add a custom SVG or animation here for visual appeal */}
+     
       <svg width="200" height="120" viewBox="0 0 200 120">
         <rect x="10" y="20" width="50" height="80" rx="10" fill="#61dafb" />
         <rect x="75" y="10" width="50" height="100" rx="10" fill="#21a1f3" />

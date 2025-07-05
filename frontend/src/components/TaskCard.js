@@ -29,27 +29,35 @@ const TaskCard = React.forwardRef(({ task, users, onEdit, onDelete, onAssign, on
   return (
     <div className={`task-card${flipped ? ' flipped' : ''}${isDragging ? ' dragging' : ''}`} ref={ref} {...draggableProps} {...dragHandleProps}>
       <div className="task-card-front">
+
         <div className="task-title">{task.title}</div>
         <div className="task-desc">{task.description}</div>
         <div className="task-meta">
+
           <span className={`task-priority priority-${task.priority?.toLowerCase()}`}>
-            {task.priority === 'High' ? '🔴' : task.priority === 'Medium' ? '🟡' : '🟢'} {task.priority}
+
+            {task.priority === 'High' ? '🔴' : task.priority === 'Medium' ? '🟡' : '🟢'} 
+            {task.priority}
           </span>
+
           <span className={`task-status status-${task.status?.toLowerCase().replace(' ', '-')}`}>{task.status}</span>
         </div>
+
         <div className="task-assigned">
           {task.assignedUser?.username ? `👤 ${task.assignedUser.username}` : '👤 Unassigned'}
         </div>
+
         <div className="task-actions">
           <button onClick={handleEdit} className="edit-btn" title="Edit Task">✏️</button>
+          
           <button onClick={() => onDelete(task)} className="delete-btn" title="Delete Task">🗑️</button>
           <button onClick={() => onSmartAssign(task)} className="smart-assign-btn" title="Smart Assign">🎯</button>
+
           <select 
             value={task.assignedUser?._id || ''} 
             onChange={e => onAssign(task, e.target.value)}
             className="assign-select"
-            title="Assign to user"
-          >
+            title="Assign to user">
             <option value="">👤 Assign to...</option>
             {users.map(u => <option key={u._id} value={u._id}>👤 {u.username}</option>)}
           </select>

@@ -6,95 +6,107 @@ import TaskCard from '../components/TaskCard';
 import { getApiUrl, getSocketUrl } from '../config/api';
 import './Board.css';
 
-const socket = io(getSocketUrl());
+const socket = io(getSocketUrl())
 
 const columns = [
   { key: 'Todo', label: 'Todo' },
   { key: 'In Progress', label: 'In Progress' },
   { key: 'Done', label: 'Done' },
-];
+]
 
 const Board = () => {
-  const [tasks, setTasks] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [tasks, setTasks] = useState([])
+  const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
   const [conflict, setConflict] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
-  const token = localStorage.getItem('token');
+  const [successMessage, setSuccessMessage] = useState('')
+  const token = localStorage.getItem('token')
+
   const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'Medium' });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragTasks, setDragTasks] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({});
-  const [disableWebSocket, setDisableWebSocket] = useState(false);
+  const [dragTasks, setDragTasks] = useState(null)
 
-  // Validation helper
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const [disableWebSocket, setDisableWebSocket] = useState(false)
+
+  
   const validateTaskTitle = (title, excludeTaskId = null) => {
     const trimmedTitle = title.trim();
     
-    // Check if title is empty
+    
     if (!trimmedTitle) {
-      return 'Task title is required';
+      return 'Task title is required'
     }
 
-    // Check if title matches column names
-    const columnNames = columns.map(col => col.label.toLowerCase());
+
+    const columnNames = columns.map(col => col.label.toLowerCase())
+
     if (columnNames.includes(trimmedTitle.toLowerCase())) {
-      return 'Task title cannot match column names (Todo, In Progress, Done)';
+      return 'Task title cannot match column names (Todo, In Progress, Done)'
     }
 
-    // Check if title is unique
+ 
     const existingTask = tasks.find(task => 
       task._id !== excludeTaskId && 
       task.title.toLowerCase() === trimmedTitle.toLowerCase()
-    );
+    )
+
     if (existingTask) {
-      return 'Task title must be unique';
+      return 'Task title must be unique'
     }
 
-    return '';
-  };
+    return ''
+  }
 
-  // Clear messages after timeout
+  
   const clearMessages = useCallback(() => {
     setTimeout(() => {
-      setError('');
-      setSuccessMessage('');
-    }, 3000);
-  }, []);
+      setError('')
+      setSuccessMessage('')
+    }, 3000)
+  }, [])
 
-  // Fetch tasks and users
+  
   const fetchTasks = useCallback(async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const res = await fetch(getApiUrl('/api/tasks'), { 
         headers: { Authorization: `Bearer ${token}` } 
-      });
+      })
+
+      //console.log(res)
+
       if (!res.ok) {
-        throw new Error('Failed to fetch tasks');
+        throw new Error('Failed to fetch tasks')
       }
-      const data = await res.json();
+      const data = await res.json()
       setTasks(data);
     } catch (err) {
-      setError('Failed to load tasks');
-      clearMessages();
+      setError('Failed to load tasks')
+      clearMessages()
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }, [token, clearMessages]);
 
   const fetchUsers = useCallback(async () => {
     try {
+
       const res = await fetch(getApiUrl('/api/auth/users'), {
         headers: { Authorization: `Bearer ${token}` }
-      });
+      })
+      //console.log(res)
+
       if (!res.ok) {
-        throw new Error('Failed to fetch users');
+        throw new Error('Failed to fetch users')
       }
-      const data = await res.json();
+      const data = await res.json()
       setUsers(data);
     } catch {
-      setUsers([]);
+      setUsers([])
     }
   }, [token]);
 
@@ -103,17 +115,17 @@ const Board = () => {
     fetchUsers();
   }, [fetchTasks, fetchUsers]);
 
-  // Real-time sync
+  
   useEffect(() => {
     const handleRefresh = () => {
-      // Don't refresh during dragging to prevent drag conflicts
+      
       if (!isDragging && !disableWebSocket) {
         fetchTasks();
       }
     };
 
     const handleTaskUpdate = (updatedTask) => {
-      // Don't update during dragging to prevent drag conflicts
+    
       if (!isDragging && !disableWebSocket) {
         setTasks(prevTasks => 
           prevTasks.map(task => 
@@ -124,7 +136,7 @@ const Board = () => {
     };
 
     const handleTaskDelete = (deletedTaskId) => {
-      // Don't update during dragging to prevent drag conflicts
+    
       if (!isDragging && !disableWebSocket) {
         setTasks(prevTasks => 
           prevTasks.filter(task => task._id !== deletedTaskId)
@@ -133,41 +145,41 @@ const Board = () => {
     };
 
     const handleTaskCreate = (newTask) => {
-      // Don't update during dragging to prevent drag conflicts
+    
       if (!isDragging && !disableWebSocket) {
         setTasks(prevTasks => [...prevTasks, newTask]);
       }
     };
 
-    socket.on('refreshTasks', handleRefresh);
-    socket.on('taskUpdated', handleTaskUpdate);
-    socket.on('taskDeleted', handleTaskDelete);
+    socket.on('refreshTasks', handleRefresh)
+    socket.on('taskUpdated', handleTaskUpdate)
+    socket.on('taskDeleted', handleTaskDelete)
     socket.on('taskCreated', handleTaskCreate);
 
     return () => {
-      socket.off('refreshTasks', handleRefresh);
+      socket.off('refreshTasks', handleRefresh)
       socket.off('taskUpdated', handleTaskUpdate);
-      socket.off('taskDeleted', handleTaskDelete);
-      socket.off('taskCreated', handleTaskCreate);
+      socket.off('taskDeleted', handleTaskDelete)
+      socket.off('taskCreated', handleTaskCreate)
     };
   }, [fetchTasks, isDragging]);
 
-  // Drag-and-drop
+  
   const onDragStart = (start) => {
     console.log('Drag started:', start.draggableId);
     setIsDragging(true);
-    // Create a deep copy of tasks to prevent reference issues
+    
     setDragTasks(tasks.map(task => ({ ...task })));
   };
 
   const onDragEnd = async (result) => {
     console.log('Drag ended:', result);
-    setIsDragging(false);
-    setDragTasks(null);
+    setIsDragging(false)
+    setDragTasks(null)
     
     if (!result.destination) {
-      console.log('No destination, drag cancelled');
-      return;
+      console.log('No destination, drag cancelled')
+      return
     }
     
     const taskId = result.draggableId;
@@ -212,7 +224,7 @@ const Board = () => {
           local: { ...task, status: newStatus }, 
           server: data.serverTask 
         });
-        // Revert optimistic update
+    
         setTasks(prevTasks =>
           prevTasks.map(t =>
             t._id === taskId ? task : t
@@ -232,7 +244,7 @@ const Board = () => {
       console.error('Error updating task:', err);
       setError('Failed to update task');
       clearMessages();
-      // Revert optimistic update
+      
       setTasks(prevTasks =>
         prevTasks.map(t =>
           t._id === taskId ? task : t
@@ -251,7 +263,7 @@ const Board = () => {
     }
 
     try {
-      // Add a 3-second delay for conflict testing
+   
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       const res = await fetch(getApiUrl(`/api/tasks/${editData._id}`), {
@@ -276,13 +288,13 @@ const Board = () => {
         throw new Error('Failed to update task');
       }
 
-      socket.emit('taskChanged', { taskId: editData._id });
-      setSuccessMessage('Task updated successfully!');
+      socket.emit('taskChanged', { taskId: editData._id })
+      setSuccessMessage('Task updated successfully!')
       clearMessages();
       fetchTasks();
     } catch (err) {
       setError('Failed to update task');
-      clearMessages();
+      clearMessages()
     }
   };
 
@@ -309,7 +321,7 @@ const Board = () => {
       setError('Failed to delete task');
       clearMessages();
     }
-  };
+  }
 
   const handleAssign = async (task, userId) => {
     try {
@@ -356,7 +368,7 @@ const Board = () => {
       const updatedTask = await res.json();
       console.log('Smart assign result:', updatedTask);
 
-      // Update the specific task in the state optimistically
+    
       setTasks(prevTasks =>
         prevTasks.map(t =>
           t._id === task._id ? updatedTask : t
@@ -383,7 +395,7 @@ const Board = () => {
       if (action === 'overwrite') {
         console.log('Attempting overwrite with:', conflict.local);
         
-        // Prepare the data for overwrite - ensure all required fields are present
+        
         const overwriteData = {
           title: conflict.local.title,
           description: conflict.local.description,
@@ -395,7 +407,7 @@ const Board = () => {
         
         console.log('Overwrite data prepared:', overwriteData);
         
-        // Force overwrite by sending without updatedAt timestamp
+  
         const res = await fetch(getApiUrl(`/api/tasks/${conflict.local._id}`), {
           method: 'PUT',
           headers: { 
@@ -411,7 +423,7 @@ const Board = () => {
           const errorData = await res.json();
           console.error('Overwrite failed:', errorData);
           
-          // Try a simpler approach - just update the task directly without forceOverwrite
+          
           console.log('Trying fallback approach...');
           const fallbackRes = await fetch(getApiUrl(`/api/tasks/${conflict.local._id}`), {
             method: 'PUT',
@@ -462,20 +474,21 @@ const Board = () => {
       } else if (action === 'merge') {
         console.log('Attempting merge with:', { local: conflict.local, server: conflict.server });
         
-        // Smart merge: combine both versions intelligently
+        
         const mergedTask = {
-          ...conflict.server, // Start with server version
-          // Merge specific fields from both versions
+          ...conflict.server, 
+          
+
           title: conflict.local.title !== conflict.server.title ? 
             `${conflict.local.title} ${conflict.server.title}` : conflict.server.title,
           description: conflict.local.description !== conflict.server.description ?
             `${conflict.local.description} ${conflict.server.description}` : conflict.server.description,
-          // Keep the most recent priority and status
+          
           priority: conflict.local.priority !== conflict.server.priority ?
             conflict.local.priority : conflict.server.priority,
           status: conflict.local.status !== conflict.server.status ?
             conflict.local.status : conflict.server.status,
-          // Keep local assigned user if different
+        
           assignedUser: conflict.local.assignedUser !== conflict.server.assignedUser ?
             conflict.local.assignedUser : conflict.server.assignedUser
         };
@@ -523,7 +536,7 @@ const Board = () => {
   const handleCreateTask = async (e) => {
     e.preventDefault();
     
-    // Clear previous validation errors
+
     setValidationErrors({});
 
     const validationError = validateTaskTitle(newTask.title);
@@ -541,7 +554,7 @@ const Board = () => {
         },
         body: JSON.stringify({
           ...newTask,
-          status: 'Todo' // Default status
+          status: 'Todo' 
         })
       });
 
@@ -568,10 +581,10 @@ const Board = () => {
     }
   };
 
-  // Render tasks - use dragTasks during dragging for smooth experience
+  
   const renderTasks = isDragging && dragTasks ? dragTasks : tasks;
 
-  // Helper function to ensure stable draggable items
+ 
   const getStableTasks = () => {
     return renderTasks.filter(task => task && task._id);
   };
@@ -603,13 +616,13 @@ const Board = () => {
           <span className="stat">
             👥 {users.length} Users
           </span>
-          {/* Debug info for smart assign testing */}
+        
           <button 
             className="debug-btn"
             onClick={async () => {
               console.log('=== SMART ASSIGN DEBUG ===');
               
-              // Frontend calculation
+              
               console.log('Frontend calculation:');
               users.forEach(user => {
                 const activeTasks = tasks.filter(task => 
@@ -618,7 +631,7 @@ const Board = () => {
                 console.log(`${user.username}: ${activeTasks} active tasks`);
               });
               
-              // Backend verification
+              
               try {
                 const res = await fetch(getApiUrl('/api/tasks/debug'), {
                   headers: { Authorization: `Bearer ${token}` }
@@ -638,7 +651,7 @@ const Board = () => {
             🔍 Debug
           </button>
           
-          {/* Conflict Testing Toggle */}
+        
           <button 
             className={`debug-btn ${disableWebSocket ? 'active' : ''}`}
             onClick={() => {
@@ -652,7 +665,7 @@ const Board = () => {
         </div>
       </div>
 
-      {/* Create Task Form */}
+ 
       <form className="new-task-form" onSubmit={handleCreateTask}>
         <div className="form-group">
           <input
@@ -684,11 +697,11 @@ const Board = () => {
         </button>
       </form>
 
-      {/* Messages */}
+      
       {error && <div className="board-error">❌ {error}</div>}
       {successMessage && <div className="board-success">✅ {successMessage}</div>}
 
-      {/* Kanban Board */}
+      
       <DragDropContext
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}

@@ -19,9 +19,11 @@ const Register = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password })
       });
-      const data = await res.json();
+      const data = await res.json()
+
+      //console.log(data)
       if (!res.ok) throw new Error(data.message || 'Registration failed');
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', data.token)
       navigate('/board');
     } catch (err) {
       setError(err.message);

@@ -23,7 +23,6 @@ const Register = () => {
       if (!res.ok) throw new Error(data.message || 'Registration failed');
       localStorage.setItem('token', data.token);
       navigate('/board');
-      window.location.reload();
     } catch (err) {
       setError(err.message);
     }

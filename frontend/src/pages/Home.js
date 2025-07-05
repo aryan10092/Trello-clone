@@ -7,12 +7,13 @@ const Home = () => (
     <h1 className="home-title">Trello Clone</h1>
     <p className="home-subtitle">Collaborate, organize, and manage your tasks in real time.</p>
     <div className="home-actions">
-      {localStorage.getItem('token') ? (
+
+   {localStorage.getItem('token') ? (
         <Link to="/board" className="home-btn">Get Started</Link>
       ) : (
         <Link to="/login" className="home-btn">Get Started</Link>
-      )}
-    </div>
+      )}  </div>
+
     <div className="home-graphic">
       {/* Add a custom SVG or animation here for visual appeal */}
       <svg width="200" height="120" viewBox="0 0 200 120">

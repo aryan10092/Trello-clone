@@ -10,6 +10,7 @@
   position: relative;
   perspective: 900px;
   transition: box-shadow 0.2s, transform 0.2s;
+  overflow:visible
 }
 .task-card.dragging {
   box-shadow: 0 8px 32px #a0c4f7;
@@ -23,6 +24,7 @@
   left: 0; top: 0;
   padding: 1rem;
   box-sizing: border-box;
+  height:100%
 }
 .task-card-front {
   z-index: 2;
@@ -39,10 +41,17 @@
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
+   min-height: 100%;
+  box-sizing: border-box;
 }
 .task-card.flipped .task-card-back {
   transform: rotateY(0deg);
 }
+.task-card.flipped {
+  min-height: 300px;
+  z-index: 1000;
+}
+
 .task-title {
   font-size: 1.2rem;
   font-weight: 600;

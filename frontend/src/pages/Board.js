@@ -250,6 +250,9 @@ const Board = () => {
     }
 
     try {
+      // Add a 3-second delay for conflict testing
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
       const res = await fetch(getApiUrl(`/api/tasks/${editData._id}`), {
         method: 'PUT',
         headers: { 
@@ -377,15 +380,135 @@ const Board = () => {
 
     try {
       if (action === 'overwrite') {
-        await handleEdit(conflict.local);
-      } else if (action === 'merge') {
-        // For merge, we keep the server version but could implement field-by-field merging
+        console.log('Attempting overwrite with:', conflict.local);
+        
+        // Prepare the data for overwrite - ensure all required fields are present
+        const overwriteData = {
+          title: conflict.local.title,
+          description: conflict.local.description,
+          priority: conflict.local.priority,
+          status: conflict.local.status,
+          assignedUser: conflict.local.assignedUser,
+          forceOverwrite: true
+        };
+        
+        console.log('Overwrite data prepared:', overwriteData);
+        
+        // Force overwrite by sending without updatedAt timestamp
+        const res = await fetch(getApiUrl(`/api/tasks/${conflict.local._id}`), {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json', 
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify(overwriteData)
+        });
+
+        console.log('Overwrite response status:', res.status);
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error('Overwrite failed:', errorData);
+          
+          // Try a simpler approach - just update the task directly without forceOverwrite
+          console.log('Trying fallback approach...');
+          const fallbackRes = await fetch(getApiUrl(`/api/tasks/${conflict.local._id}`), {
+            method: 'PUT',
+            headers: { 
+              'Content-Type': 'application/json', 
+              Authorization: `Bearer ${token}` 
+            },
+            body: JSON.stringify({
+              title: conflict.local.title,
+              description: conflict.local.description,
+              priority: conflict.local.priority,
+              status: conflict.local.status,
+              assignedUser: conflict.local.assignedUser
+            })
+          });
+          
+          if (!fallbackRes.ok) {
+            const fallbackError = await fallbackRes.json();
+            console.error('Fallback also failed:', fallbackError);
+            throw new Error(`Failed to overwrite task: ${fallbackError.message || fallbackRes.statusText}`);
+          }
+          
+          const fallbackTask = await fallbackRes.json();
+          console.log('Fallback successful:', fallbackTask);
+          
+          setTasks(prevTasks =>
+            prevTasks.map(t =>
+              t._id === conflict.local._id ? fallbackTask : t
+            )
+          );
+          socket.emit('taskChanged', { taskId: conflict.local._id });
+          setSuccessMessage('Your changes have been saved!');
+          clearMessages();
+          return;
+        }
+
+        const updatedTask = await res.json();
+        console.log('Overwrite successful:', updatedTask);
+        
         setTasks(prevTasks =>
           prevTasks.map(t =>
-            t._id === conflict.server._id ? conflict.server : t
+            t._id === conflict.local._id ? updatedTask : t
           )
         );
-        setSuccessMessage('Conflict resolved with server version');
+        socket.emit('taskChanged', { taskId: conflict.local._id });
+        setSuccessMessage('Your changes have been saved!');
+        clearMessages();
+      } else if (action === 'merge') {
+        console.log('Attempting merge with:', { local: conflict.local, server: conflict.server });
+        
+        // Smart merge: combine both versions intelligently
+        const mergedTask = {
+          ...conflict.server, // Start with server version
+          // Merge specific fields from both versions
+          title: conflict.local.title !== conflict.server.title ? 
+            `${conflict.local.title} ${conflict.server.title}` : conflict.server.title,
+          description: conflict.local.description !== conflict.server.description ?
+            `${conflict.local.description} ${conflict.server.description}` : conflict.server.description,
+          // Keep the most recent priority and status
+          priority: conflict.local.priority !== conflict.server.priority ?
+            conflict.local.priority : conflict.server.priority,
+          status: conflict.local.status !== conflict.server.status ?
+            conflict.local.status : conflict.server.status,
+          // Keep local assigned user if different
+          assignedUser: conflict.local.assignedUser !== conflict.server.assignedUser ?
+            conflict.local.assignedUser : conflict.server.assignedUser
+        };
+
+        console.log('Merged task:', mergedTask);
+
+        const res = await fetch(getApiUrl(`/api/tasks/${conflict.local._id}`), {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json', 
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify({ 
+            ...mergedTask,
+            forceOverwrite: true
+          })
+        });
+
+        console.log('Merge response status:', res.status);
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error('Merge failed:', errorData);
+          throw new Error(`Failed to merge task: ${errorData.message || res.statusText}`);
+        }
+
+        const updatedTask = await res.json();
+        setTasks(prevTasks =>
+          prevTasks.map(t =>
+            t._id === conflict.local._id ? updatedTask : t
+          )
+        );
+        socket.emit('taskChanged', { taskId: conflict.local._id });
+        setSuccessMessage('Changes merged successfully!');
         clearMessages();
       }
     } catch (err) {
@@ -632,6 +755,11 @@ const Board = () => {
                   <span className="task-meta">
                     Status: {conflict.local.status} | Priority: {conflict.local.priority}
                   </span>
+                  {conflict.local.assignedUser && (
+                    <span className="task-meta">
+                      Assigned: {conflict.local.assignedUser.username}
+                    </span>
+                  )}
                 </div>
               </div>
               
@@ -643,7 +771,33 @@ const Board = () => {
                   <span className="task-meta">
                     Status: {conflict.server.status} | Priority: {conflict.server.priority}
                   </span>
+                  {conflict.server.assignedUser && (
+                    <span className="task-meta">
+                      Assigned: {conflict.server.assignedUser.username}
+                    </span>
+                  )}
                 </div>
+              </div>
+              
+              <div className="conflict-differences">
+                <h4>🔍 Field Differences:</h4>
+                <ul>
+                  {conflict.local.title !== conflict.server.title && (
+                    <li><strong>Title:</strong> "{conflict.local.title}" vs "{conflict.server.title}"</li>
+                  )}
+                  {conflict.local.description !== conflict.server.description && (
+                    <li><strong>Description:</strong> Different content</li>
+                  )}
+                  {conflict.local.status !== conflict.server.status && (
+                    <li><strong>Status:</strong> {conflict.local.status} vs {conflict.server.status}</li>
+                  )}
+                  {conflict.local.priority !== conflict.server.priority && (
+                    <li><strong>Priority:</strong> {conflict.local.priority} vs {conflict.server.priority}</li>
+                  )}
+                  {conflict.local.assignedUser?._id !== conflict.server.assignedUser?._id && (
+                    <li><strong>Assigned User:</strong> Different assignment</li>
+                  )}
+                </ul>
               </div>
             </div>
             
@@ -652,13 +806,13 @@ const Board = () => {
                 onClick={() => handleConflict('overwrite')}
                 className="btn-overwrite"
               >
-                📝 Keep My Changes
+                📝 Overwrite with My Changes
               </button>
               <button 
                 onClick={() => handleConflict('merge')}
                 className="btn-merge"
               >
-                🔄 Keep Server Version
+                🔄 Smart Merge Both Versions
               </button>
               <button 
                 onClick={() => setConflict(null)}

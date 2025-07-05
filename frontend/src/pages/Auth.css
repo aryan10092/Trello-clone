@@ -61,7 +61,7 @@
   margin-top: 0.5rem;
   font-size: 0.98rem;
 }
-.auth-switch a {
+.auth-switch a, .auth-links a  {
   color: #007acc;
   text-decoration: underline;
   font-weight: 500;

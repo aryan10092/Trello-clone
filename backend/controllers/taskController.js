@@ -36,18 +36,50 @@ exports.updateTask = async (req, res) => {
   try {
     const { id } = req.params;
     const update = req.body;
-    // Conflict handling: check updatedAt
+    
+    console.log('Update request for task:', id);
+    console.log('Update data:', update);
+    console.log('Force overwrite:', update.forceOverwrite);
+    
     const task = await Task.findById(id);
     if (!task) return res.status(404).json({ message: 'Task not found.' });
-    if (update.updatedAt && new Date(update.updatedAt).getTime() !== new Date(task.updatedAt).getTime()) {
+    
+    console.log('Current task:', task);
+    
+    // Skip conflict check if forceOverwrite is true (for conflict resolution)
+    if (!update.forceOverwrite && update.updatedAt && new Date(update.updatedAt).getTime() !== new Date(task.updatedAt).getTime()) {
+      console.log('Conflict detected!');
       // Conflict detected
       return res.status(409).json({ message: 'Conflict detected.', serverTask: task });
     }
-    Object.assign(task, update);
+    
+    console.log('No conflict, proceeding with update');
+    
+    // Remove forceOverwrite flag before saving
+    const { forceOverwrite, ...updateData } = update;
+    console.log('Final update data:', updateData);
+    
+    // For conflict resolution, skip title uniqueness validation
+    if (forceOverwrite && updateData.title) {
+      // Check if title conflicts with other tasks (excluding current task)
+      const existingTask = await Task.findOne({ 
+        title: updateData.title, 
+        _id: { $ne: id } 
+      });
+      if (existingTask) {
+        console.log('Title conflict detected, but allowing due to forceOverwrite');
+        // Still allow the update for conflict resolution
+      }
+    }
+    
+    Object.assign(task, updateData);
     await task.save();
     await logAction(req.user.id, 'update', task._id, 'Updated task');
+    
+    console.log('Task updated successfully:', task);
     res.json(task);
   } catch (err) {
+    console.error('Update task error:', err);
     res.status(500).json({ message: 'Server error.' });
   }
 };

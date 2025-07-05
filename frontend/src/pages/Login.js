@@ -30,6 +30,7 @@ const Login = () => {
       
       localStorage.setItem('token', data.token);
       navigate('/board');
+      window.location.reload();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -75,11 +76,15 @@ const Login = () => {
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
-        </form>
-        
-        <div className="auth-links">
+
+          <div className="auth-links ">
           <p>Don't have an account? <Link to="/register">Register here</Link></p>
         </div>
+        </form>
+        
+        {/* <div className="auth-links">
+          <p>Don't have an account? <Link to="/register">Register here</Link></p>
+        </div> */}
       </div>
     </div>
   );

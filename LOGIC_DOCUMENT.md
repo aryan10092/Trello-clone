@@ -15,6 +15,8 @@ If User A and User B both open the same task:
 •	A edits and saves the task first.
 •	Then B also tries to save their version — but their data is outdated.
 This leads to a conflict, because the server’s version has changed since B last saw it.
+
+IMP POINT: I INTENTIONALLY ADDED A 3 SECOND DELAY USING A PROMISE ON EDIT FUNCTION TO EASILY TEST THE CONFLICT DETECTION MECHANISM
 ________________________________________
  How I Detect Conflicts
 Each task has an updatedAt timestamp.

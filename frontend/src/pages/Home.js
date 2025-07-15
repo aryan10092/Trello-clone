@@ -4,7 +4,7 @@ import './Home.css';
 
 const Home = () => (
   <div className="home-container">
-    <h1 className="home-title">Trello Clone</h1>
+    <h1 className="home-title">TaskFlow</h1>
     <p className="home-subtitle">Collaborate, organize, and manage your tasks in real time.</p>
     <div className="home-actions">
 

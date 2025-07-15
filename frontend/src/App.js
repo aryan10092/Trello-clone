@@ -16,7 +16,7 @@ function Layout({ children }) {
   return (
     <div className="main-layout">
       <header className="main-header">
-        <span className="main-logo">Trello Clone</span>
+        <span className="main-logo">TaskFlow</span>
         {isLoggedIn() && <button className="logout-btn" onClick={logout}>Logout</button>}
       </header>
       {children}

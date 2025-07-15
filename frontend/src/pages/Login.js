@@ -42,10 +42,12 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
 
-        <h2 className="auth-title">
-          Login</h2>
+       
         <form onSubmit={handleSubmit} className="auth-form">
+           <h2 className="auth-title">
+          Login</h2>
           <div className="form-group">
+    
             <label htmlFor="email">Email</label>
             <input
               type="email"
